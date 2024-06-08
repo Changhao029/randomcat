@@ -1,6 +1,6 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import RandomCat from "./components/Randomcat";
+import { RandomCat } from "./components/Randomcat";
 
 
 function App() {

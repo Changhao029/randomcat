@@ -3,38 +3,26 @@ import Button from "@mui/material/Button"
 import CircularProgress from "@mui/material/CircularProgress"
 import Stack from "@mui/material/Stack"
 import TextField from "@mui/material/TextField"
-import { useState } from "react"
+import { useReducer, useState } from "react"
+import { fetchImage } from "../api/fetchImage"
+import { RandomCatReducer } from "../reducer/RandomCatReducer"
 import Image from "./Image"
 
-
-const RandomCat = () => {
-    const [loading, setLoading] = useState(false)
+export const RandomCat = () => {
     const [text, setText] = useState("")
     const [fontcolor, setFontcolor] = useState("")
     const [fontsize, setFontsize] = useState("")
-    const [resultURL, setResultURL] = useState("")
 
-    const fetchImage = async (final_url: string) => {
-        setLoading(true);
-        try {
-            const response = await fetch(final_url);
-            if (!response.ok) {
-            throw new Error('Failed to fetch cat image');
-            }
-            const data = await response.blob();
-            setResultURL(URL.createObjectURL(data));
-        } catch (error) {
-            console.error('Error fetching cat image:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [randomCateState, randomCatDispatch] = useReducer(RandomCatReducer, {
+        loading: false,
+        text: "",
+        fontcolor: "",
+        fontsize: "",
+        resultURL: "",
+    })
 
-    const handleFetch = () => {
+    const handleFetch = async () => {
         let final_url = "https://cataas.com/cat"
-        console.log(text)
-        console.log(fontsize)
-        console.log(fontcolor)
         if (text){
             final_url = final_url + "/says/" + text
         }
@@ -46,12 +34,18 @@ const RandomCat = () => {
         }else if (fontsize && !fontcolor) {
             final_url = final_url + "?fontSize=" + fontsize
         }
-        console.log(final_url)
-        fetchImage(final_url)
+        try {
+            randomCatDispatch({type:"SET_IS_LOADING", payload: true})
+            const result = await fetchImage(final_url);
+            console.log(result); 
+            randomCatDispatch({type:"RANDOM_CAT_UPDATE", payload: result})
+            console.log(randomCateState.resultURL)
+        } catch (error) {
+            console.error("Error fetching image:", error);
+        }finally{
+            randomCatDispatch({type:"SET_IS_LOADING", payload: false})
+        }
     }
-
-
-    
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -62,7 +56,6 @@ const RandomCat = () => {
                 <TextField id="fontsize" value={fontsize} onChange={e => setFontsize(e.target.value)} label="Fontsize"/>
                 <Button variant="contained" onClick={handleFetch}>Fetch</Button>
                 </Stack>
-                { resultURL && (
                 <Stack
                     justifyContent="center"
                     spacing={2}
@@ -71,22 +64,19 @@ const RandomCat = () => {
                     alignItems: 'center',
                     }}
                 >
-                    {loading ? (
+                    {randomCateState.loading ? (
                         <CircularProgress />
-                    ): (
+                    ): (randomCateState.resultURL && (
                         <Box 
                         width={1000}
                         height={700}
                         bgcolor="white"
                     >
-                        <Image src={resultURL} alt="alt" height={700}/>
+                        <Image src={randomCateState.resultURL} alt="alt" height={700}/>
                     </Box>
-                    )}    
+                    ))}    
                 </Stack>
-                )}
             </Stack>
         </Box>
     )
 }
-
-export default RandomCat
