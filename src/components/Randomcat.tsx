@@ -3,10 +3,11 @@ import Button from "@mui/material/Button"
 import CircularProgress from "@mui/material/CircularProgress"
 import Stack from "@mui/material/Stack"
 import TextField from "@mui/material/TextField"
-import { useReducer, useState } from "react"
+import { useEffect, useReducer, useState } from "react"
 import { fetchImage } from "../api/fetchImage"
 import { RandomCatReducer } from "../reducer/RandomCatReducer"
 import Image from "./Image"
+import { useQuery } from '@tanstack/react-query'
 
 export const RandomCat = () => {
     const [text, setText] = useState("")
@@ -21,30 +22,41 @@ export const RandomCat = () => {
         resultURL: "",
     })
 
-    const handleFetch = async () => {
-        let final_url = "https://cataas.com/cat"
-        if (text){
-            final_url = final_url + "/says/" + text
+    const {isLoading, isSuccess, isError, data, refetch} = useQuery({
+        queryKey: ['randomCat', text, fontsize, fontcolor],
+        queryFn: () => fetchImage(text, fontsize, fontcolor),
+        enabled: false,
+        },
+    );
+    useEffect(() => {
+        randomCatDispatch({
+          type: "SET_IS_LOADING",
+          payload: isLoading,
+        });
+    }, [isLoading]);
+
+    useEffect(() => {
+        if (isSuccess && data){
+        randomCatDispatch({
+            type: "SET_IS_LOADING",
+            payload: false,
+        });
+        randomCatDispatch({
+            type: "RANDOM_CAT_UPDATE",
+            payload: data,
+        });
         }
-        console.log(final_url)
-        if ( fontsize && fontcolor){
-            final_url = final_url + "?fontSize=" + fontsize + "&fontColor=" + fontcolor
-        }else if (!fontsize && fontcolor) {
-            final_url = final_url + "?fontColor=" + fontcolor
-        }else if (fontsize && !fontcolor) {
-            final_url = final_url + "?fontSize=" + fontsize
-        }
-        try {
-            randomCatDispatch({type:"SET_IS_LOADING", payload: true})
-            const result = await fetchImage(final_url);
-            console.log(result); 
-            randomCatDispatch({type:"RANDOM_CAT_UPDATE", payload: result})
-            console.log(randomCateState.resultURL)
-        } catch (error) {
-            console.error("Error fetching image:", error);
-        }finally{
-            randomCatDispatch({type:"SET_IS_LOADING", payload: false})
-        }
+    }, [isSuccess, data]);
+
+    useEffect(() => {
+        randomCatDispatch({
+          type: "SET_IS_LOADING",
+          payload: false,
+        });
+    }, [isError]);
+
+    const handleFetch = () => {
+        refetch({cancelRefetch: false})
     }
 
     return (

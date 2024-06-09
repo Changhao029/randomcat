@@ -1,7 +1,13 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { RandomCat } from "./components/Randomcat";
+import {
 
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
 
 function App() {
   const themeDark = createTheme ({
@@ -15,7 +21,9 @@ function App() {
   return (
     <ThemeProvider theme={themeDark}>
       <CssBaseline />
-      <RandomCat />
+      <QueryClientProvider client={queryClient}>
+        <RandomCat />
+      </QueryClientProvider>
     </ThemeProvider>  
   )
 }
