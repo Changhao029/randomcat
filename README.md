@@ -1,4 +1,4 @@
-# lw-training-leo
+# RandomCat-leo
 
 ## 1. Clone this project
 
