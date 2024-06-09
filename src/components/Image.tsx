@@ -3,7 +3,6 @@ import { useRef, useState } from "react";
 type ImageProps = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>
 
 export default function Image({ src, alt, height}: ImageProps) {
-  const imgRef = useRef<HTMLImageElement | null>(null);
   const [isError, setIsError] = useState(false);
 
   if (isError) {
@@ -13,7 +12,6 @@ export default function Image({ src, alt, height}: ImageProps) {
   return (
     <>
       <img
-        ref={imgRef}
         src={src}
         loading="lazy"
         style={{
