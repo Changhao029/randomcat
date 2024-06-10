@@ -22,7 +22,7 @@ export const RandomCat = () => {
         resultURL: "",
     })
 
-    const {isLoading, isSuccess, isError, data, refetch} = useQuery({
+    const {isLoading, isFetching, isSuccess, isError, data, refetch} = useQuery({
         queryKey: ['randomCat', text, fontsize, fontcolor],
         queryFn: () => fetchImage(text, fontsize, fontcolor),
         enabled: false,
@@ -31,9 +31,9 @@ export const RandomCat = () => {
     useEffect(() => {
         randomCatDispatch({
           type: "SET_IS_LOADING",
-          payload: isLoading,
+          payload: isLoading || isFetching,
         });
-    }, [isLoading]);
+    }, [isLoading, isFetching]);
 
     useEffect(() => {
         if (isSuccess && data){
